@@ -1,77 +1,80 @@
--- Key System
-
-
+--// SXYNA Paid Key System
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+--// Create Main Window
 local Window = Rayfield:CreateWindow({
-    Name = "SXYNA PAYED V1 - KEY",
-    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
-    LoadingTitle = " SXYNA",
+    Name = "SXYNA PAID V1 - KEY",
+    Icon = 0,
+    LoadingTitle = "SXYNA",
     LoadingSubtitle = "Welcome!",
-    ShowText = "SXYNA KEY", -- for mobile users to unhide rayfield, change if you'd like
-    Theme = "Amethyst", -- Check https://docs.sirius.menu/rayfield/configuration/themes
- 
-    ToggleUIKeybind = "P", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
- 
+    ShowText = "SXYNA KEY",
+    Theme = "Amethyst",
+    ToggleUIKeybind = "P",
+
     DisableRayfieldPrompts = true,
-    DisableBuildWarnings = true, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
- 
+    DisableBuildWarnings = true,
+
     ConfigurationSaving = {
-       Enabled = true,
-       FolderName = SXYNA, -- Create a custom folder for your hub/game
-       FileName = "PAID Key"
+        Enabled = true,
+        FolderName = "SXYNA",
+        FileName = "PAID Key"
     },
- 
+
     Discord = {
-       Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
-       Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
-       RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+        Enabled = false,
+        Invite = "noinvitelink",
+        RememberJoins = true
     },
- 
-    KeySystem = false, -- Set this to true to use our key system
-    KeySettings = {
-    }
 
+    KeySystem = false,
+    KeySettings = {}
+})
 
-    Rayfield:Notify({
-        Title = "SXYNA - Key System",
-        Content = "Welcome! To Prevent People From Just Using This Script, We Need You To Verify Your Identity.",
-        Duration = 6.5,
-        Image = "code",
-     })
+--// Create Key Tab
+local Tab = Window:CreateTab("Key Verification", "lock")
 
-     local Input = Tab:CreateInput({
-        Name = "Enter The Key...",
-        CurrentValue = "",
-        PlaceholderText = "Put The Key Here",
-        RemoveTextAfterFocusLost = false,
-        Flag = "Key",
-        Callback = function(K1EY)
-        end,
-     })
-     local Button = Tab:CreateButton({
-        Name = "Check Key",
-        Callback = function()
-            If (K1EY) == ("SXYNA-PAID-1498DIK")
-                then
-                    Rayfield:Notify({
-                        Title = "SXYNA - Key System",
-                        Content = "Key Accepted.",
-                        Duration = 6.5,
-                        Image = "code",
-                        
-                        loadstring(game:HttpGet("https://raw.githubusercontent.com/Azureee-cpu/SXYNA-Paid/refs/heads/main/Main"))()
-                     })
+--// Notify User
+Rayfield:Notify({
+    Title = "SXYNA - Key System",
+    Content = "Welcome! Please enter your key to continue.",
+    Duration = 6.5,
+    Image = "code"
+})
 
-                     
-                else
-                    Rayfield:Notify({
-                        Title = "SXYNA - Key System",
-                        Content = "Key Incorrect.",
-                        Duration = 6.5,
-                        Image = "code",
-                     }) 
+--// Key Input
+local userKey = ""
+local Input = Tab:CreateInput({
+    Name = "Enter The Key...",
+    CurrentValue = "",
+    PlaceholderText = "Put The Key Here",
+    RemoveTextAfterFocusLost = false,
+    Flag = "Key",
+    Callback = function(KeyValue)
+        userKey = KeyValue
+    end
+})
 
-        end,
-     })
+--// Check Key Button
+local Button = Tab:CreateButton({
+    Name = "Check Key",
+    Callback = function()
+        if userKey == "SXYNA-PAID-1498DIK" then
+            Rayfield:Notify({
+                Title = "SXYNA - Key System",
+                Content = "Key Accepted.",
+                Duration = 6.5,
+                Image = "code"
+            })
 
-
+            --// Load the main script
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Azureee-cpu/SXYNA-Paid/refs/heads/main/Main"))()
+        else
+            Rayfield:Notify({
+                Title = "SXYNA - Key System",
+                Content = "Key Incorrect.",
+                Duration = 6.5,
+                Image = "code"
+            })
+        end
+    end
+})
