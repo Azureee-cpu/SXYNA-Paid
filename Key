@@ -1,0 +1,75 @@
+-- Key System
+
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Window = Rayfield:CreateWindow({
+    Name = "SXYNA PAYED V1 - KEY",
+    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+    LoadingTitle = " SXYNA",
+    LoadingSubtitle = "Welcome!",
+    ShowText = "SXYNA KEY", -- for mobile users to unhide rayfield, change if you'd like
+    Theme = "Amethyst", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+ 
+    ToggleUIKeybind = "P", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+ 
+    DisableRayfieldPrompts = true,
+    DisableBuildWarnings = true, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+ 
+    ConfigurationSaving = {
+       Enabled = true,
+       FolderName = SXYNA, -- Create a custom folder for your hub/game
+       FileName = "PAID Key"
+    },
+ 
+    Discord = {
+       Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+       Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+       RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+    },
+ 
+    KeySystem = false, -- Set this to true to use our key system
+    KeySettings = {
+    }
+
+
+    Rayfield:Notify({
+        Title = "SXYNA - Key System",
+        Content = "Welcome! To Prevent People From Just Using This Script, We Need You To Verify Your Identity.",
+        Duration = 6.5,
+        Image = "code",
+     })
+
+     local Input = Tab:CreateInput({
+        Name = "Enter The Key...",
+        CurrentValue = "",
+        PlaceholderText = "Put The Key Here",
+        RemoveTextAfterFocusLost = false,
+        Flag = "Key",
+        Callback = function(K1EY)
+        end,
+     })
+     local Button = Tab:CreateButton({
+        Name = "Check Key",
+        Callback = function()
+            If (K1EY) == ("SXYNA-PAID-1498DIK")
+                then
+                    Rayfield:Notify({
+                        Title = "SXYNA - Key System",
+                        Content = "Key Accepted.",
+                        Duration = 6.5,
+                        Image = "code",
+                     })
+
+                     
+                else
+                    Rayfield:Notify({
+                        Title = "SXYNA - Key System",
+                        Content = "Key Incorrect.",
+                        Duration = 6.5,
+                        Image = "code",
+                     }) 
+
+        end,
+     })
+
+
