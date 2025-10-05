@@ -41,6 +41,10 @@ Rayfield:Notify({
     Image = "code"
 })
 
+
+
+local Section = Tab:CreateSection("Key")
+
 --// Key Input
 local userKey = ""
 local Input = Tab:CreateInput({
@@ -53,6 +57,8 @@ local Input = Tab:CreateInput({
         userKey = KeyValue
     end
 })
+
+
 
 --// Check Key Button
 local Button = Tab:CreateButton({
@@ -78,3 +84,20 @@ local Button = Tab:CreateButton({
         end
     end
 })
+
+local Section = Tab:CreateSection("How To Get Your Key.")
+
+local Button = Tab:CreateButton({
+    Name = "Get The Key",
+    Callback = function()
+        Rayfield:Notify({
+            Title = "SXYNA",
+            Content = "Key Copied.",
+            Duration = 6.5,
+            Image = "code",
+         })
+
+         setclipboard("SXYNA-PAID-1498DIK")
+
+    end,
+ })
