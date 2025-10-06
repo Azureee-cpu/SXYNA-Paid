@@ -169,10 +169,29 @@
     PlaceholderText = "Speed",
     RemoveTextAfterFocusLost = true,
     Flag = "Input1",
-    Callback = function(num)
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = num
+    Callback = function(num1)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = num1
+        Rayfield:Notify({
+            Title = "SXYNA - Notifications",
+            Content = "Player Speed Has Been Changed. If You Need Help Visit The Help Tab.",
+            Duration = 6.5,
+            Image = "code",
+        })
     end,
  })
+
+local RSpeedButton = PlayerTab:CreateButton({
+   Name = "Reset Player Speed",
+   Callback = function()
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = ("16")
+        Rayfield:Notify({
+            Title = "SXYNA - Notifications",
+            Content = "Player Speed Has Been Reset. If You Need Help Visit The Help Tab.",
+            Duration = 6.5,
+            Image = "code",
+        })
+   end,
+})
 
  local JPInput = PlayerTab:CreateInput({
     Name = "JumpPower Changer",
@@ -180,11 +199,31 @@
     PlaceholderText = "Power",
     RemoveTextAfterFocusLost = true,
     Flag = "Input1",
-    Callback = function(num)
-        game.Players.LocalPlayer.Character.Humanoid.JumpPower = num
+    Callback = function(num2)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = num2
+                -- Notification
+            Rayfield:Notify({
+                Title = "SXYNA - Notifications",
+                Content = "Player Jump Power Has Been Changed. If You Need Help Visit The Help Tab.",
+                Duration = 6.5,
+                Image = "code",
+            })
     end,
  })
 
+ local RJumpButton = PlayerTab:CreateButton({
+    Name = "Reset Player Jump Power",
+    Callback = function()
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = ("50")
+        -- Notification
+        Rayfield:Notify({
+            Title = "SXYNA - Notifications",
+            Content = "Player Jump Power Has Been Reset. If You Need Help Visit The Help Tab.",
+            Duration = 6.5,
+            Image = "code",
+         })
+    end,
+ })
 
  
 
@@ -206,3 +245,20 @@
         end
     }
 )
+
+
+local HelpTab = Window:CreateTab("Help", "shield-alert")
+
+local Button = HelpTab:CreateButton({
+    Name = "Discord Server",
+    Callback = function()
+        setclipboard(".gg/template")
+        Rayfield:Notify({
+            Title = "SXYNA - Notifications",
+            Content = "Discord Link Copied.",
+            Duration = 6.5,
+            Image = "code",
+         })
+    end,
+ })
+
