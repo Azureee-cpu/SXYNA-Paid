@@ -1,41 +1,166 @@
--- Main Menu
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Players = game:GetService("Players")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
 
 
 
-local Window = Rayfield:CreateWindow({
-    Name = "SXYNA PAYED V1",
-    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
-    LoadingTitle = " SXYNA",
-    LoadingSubtitle = "Welcome! Have Fun.",
-    ShowText = "SXYNA PAID", -- for mobile users to unhide rayfield, change if you'd like
-    Theme = "Amethyst", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+ -- Main Menu
+ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+
+
+ local Window = Rayfield:CreateWindow({
+     Name = "SXYNA PAYED V1",
+     Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+     LoadingTitle = " SXYNA",
+     LoadingSubtitle = "Welcome! Have Fun.",
+     ShowText = "SXYNA PAID", -- for mobile users to unhide rayfield, change if you'd like
+     Theme = "Amethyst", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+  
+     ToggleUIKeybind = "P", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+  
+     DisableRayfieldPrompts = true,
+     DisableBuildWarnings = true, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+  
+     ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "SXYNA", -- Create a custom folder for your hub/game
+        FileName = "PAID"
+     },
+  
+     Discord = {
+        Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+        Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+        RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+     },
+  
+     KeySystem = false, -- Set this to true to use our key system
+     KeySettings = {
+        Title = "Untitled",
+        Subtitle = "Key System",
+        Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
+        FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+        SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+        GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+        Key = {""} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+     }
+  })
  
-    ToggleUIKeybind = "P", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+  Rayfield:Notify({
+     Title = "SXYNA Notifications",
+     Content = "Your Key Has Been Accepted. Have Fun.",
+     Duration = 6.5,
+     Image = "rewind",
+  })
  
-    DisableRayfieldPrompts = true,
-    DisableBuildWarnings = true, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+  local Tab = Window:CreateTab("Information", "book-open-text")
+  
+  local Section = Tab:CreateSection("Executor Information")
  
-    ConfigurationSaving = {
-       Enabled = true,
-       FolderName = SXYNA, -- Create a custom folder for your hub/game
-       FileName = "PAID"
-    },
+  -- Supported executors
+ local supportedExecutors = {
+     ["xeno"] = true,
+     ["delta"] = true
+ }
  
-    Discord = {
-       Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
-       Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
-       RememberJoins = true -- Set this to false to make them join the discord every time they load it up
-    },
+ -- Robust executor detection
+ local function detectExecutor()
+     -- Xeno detection
+     if type(rawget(_G, "Xeno")) == "table" then
+         return "Xeno"
+     end
+     if pcall(function() return Xeno end) then
+         return "Xeno"
+     end
  
-    KeySystem = false, -- Set this to true to use our key system
-    KeySettings = {
-       Title = "Untitled",
-       Subtitle = "Key System",
-       Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
-       FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
-       SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
-       GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
-       Key = {""} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
-    }
+     -- Delta detection
+     if rawget(_G, "DELTA") or rawget(_G, "Delta") or rawget(_G, "delta") then
+         return "Delta"
+     end
+ 
+     -- Synapse
+     if syn then return "Synapse X" end
+     -- KRNL
+     if KRNL_LOADED then return "Krnl" end
+     -- Fluxus
+     if Fluxus then return "Fluxus" end
+     -- SirHurt
+     if is_sirhurt_closure then return "SirHurt" end
+ 
+     -- Fallback based on functions many executors define
+     if type(setclipboard) == "function" then
+         return "Unknown (setclipboard exists)"
+     end
+ 
+     return "Unknown"
+ end
+ 
+ -- Normalize for supported check
+ local function normalizeName(name)
+     if not name then return "unknown" end
+     name = name:lower()
+     if name:match("xeno") then return "xeno" end
+     if name:match("delta") then return "delta" end
+     return "unknown"
+ end
+ 
+ -- Detect
+ local executorName = detectExecutor()
+ local normalized = normalizeName(executorName)
+ local isSupported = supportedExecutors[normalized] or false
+ 
+ -- Update Rayfield paragraphs
+ local ParagraphExecutor = Tab:CreateParagraph({
+     Title = "Executor:",
+     Content = executorName
  })
+ 
+ local ParagraphSupported = Tab:CreateParagraph({
+     Title = "Supported?",
+     Content = isSupported and "Executor Is Supported" or "Executor Not Supported. Some features may not work."
+ })
+ 
+ local Section = Tab:CreateSection("Player Information")
+ 
+ -- Basic info (static)
+ local username = LocalPlayer.Name
+ local displayName = LocalPlayer.DisplayName
+ local userId = LocalPlayer.UserId
+ local accountAge = LocalPlayer.AccountAge
+ local accountCreationDate = os.date("%Y-%m-%d", os.time() - accountAge*24*60*60)
+ local membershipType = LocalPlayer.MembershipType.Name
+ local isPremium = LocalPlayer.MembershipType == Enum.MembershipType.Premium
+ 
+ -- Thumbnail
+ local thumbnailUrl = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+ 
+ -- Rayfield static paragraphs
+ Tab:CreateParagraph({Title = "Username", Content = username})
+ Tab:CreateParagraph({Title = "Display Name", Content = displayName})
+ Tab:CreateParagraph({Title = "UserId", Content = tostring(userId)})
+ Tab:CreateParagraph({Title = "Account Age (days)", Content = tostring(accountAge)})
+ Tab:CreateParagraph({Title = "Account Creation Date", Content = accountCreationDate})
+ Tab:CreateParagraph({Title = "Membership Type", Content = membershipType})
+ Tab:CreateParagraph({Title = "Premium Member?", Content = isPremium and "Yes" or "No"})
+ 
+ -- Thumbnail Image
+ local ContentFrame = Tab["Content"] or Tab.Frame
+ if ContentFrame then
+     local ThumbnailLabel = Instance.new("ImageLabel")
+     ThumbnailLabel.Size = UDim2.new(0, 100, 0, 100)
+     ThumbnailLabel.Position = UDim2.new(0, 10, 0, 10)
+     ThumbnailLabel.Image = thumbnailUrl
+     ThumbnailLabel.BackgroundTransparency = 1
+     ThumbnailLabel.Parent = ContentFrame
+ end
+ 
+ 
+  local PlayerTab = Window:CreateTab("Player", "user-round")
+ 
+ local KeybindsTab = Window:CreateTab("Keybinds", "square-chevron-up")
+
+ 
+ local SettingsTab = Window:CreateTab("Settings", "settings")
+ 
+ 
