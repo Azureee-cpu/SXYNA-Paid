@@ -41,8 +41,6 @@ Rayfield:Notify({
     Image = "code"
 })
 
-
-
 local Section = Tab:CreateSection("Key")
 
 --// Key Input
@@ -58,13 +56,35 @@ local Input = Tab:CreateInput({
     end
 })
 
+--// Valid Keys
+local validKeys = {
+    "SXYNA-PAID-1498DIK",
+    "SXYNA-PAID-KD919IK",
+    "SXYNA-PAID-1J195U",
+    "SXYNA-PAID-02X1A9",
+    "SXYNA-PAID-9981DX",
+    "SXYNA-PAID-77KDQ1",
+    "SXYNA-PAID-55J0WD",
+    "SXYNA-PAID-881KDE",
+    "SXYNA-PAID-119UAD",
+    "SXYNA-PAID-710Z9M"
+}
 
+--// Key Validation Function
+local function isValidKey(key)
+    for _, v in ipairs(validKeys) do
+        if key == v then
+            return true
+        end
+    end
+    return false
+end
 
 --// Check Key Button
 local Button = Tab:CreateButton({
     Name = "Check Key",
     Callback = function()
-        if userKey == "SXYNA-PAID-1498DIK" then
+        if isValidKey(userKey) then
             Rayfield:Notify({
                 Title = "SXYNA - Key System",
                 Content = "Key Accepted.",
@@ -72,7 +92,7 @@ local Button = Tab:CreateButton({
                 Image = "code"
             })
 
-            --// Load the main script
+            task.wait(1.5)
             loadstring(game:HttpGet("https://raw.githubusercontent.com/Azureee-cpu/SXYNA-Paid/refs/heads/main/Main"))()
         else
             Rayfield:Notify({
@@ -85,19 +105,66 @@ local Button = Tab:CreateButton({
     end
 })
 
-local Section = Tab:CreateSection("How To Get Your Key.")
+local Section = Tab:CreateSection("Discord Server")
 
 local Button = Tab:CreateButton({
-    Name = "Get The Key",
+    Name = "Discord Server",
     Callback = function()
+        setclipboard(".gg/template")
         Rayfield:Notify({
             Title = "SXYNA",
-            Content = "Key Copied.",
+            Content = "Discord Link Copied.",
             Duration = 6.5,
             Image = "code",
-         })
-
-         setclipboard("SXYNA-PAID-1498DIK")
-
+        })
     end,
- })
+})
+
+--// How to Get Key Section
+local Section = Tab:CreateSection("How To Get A Key")
+
+--// Dropdown for Key Selection
+local selectedKeyIndex = 1
+local Dropdown = Tab:CreateDropdown({
+    Name = "Select Key Number",
+    Options = {
+        "Key #1", "Key #2", "Key #3", "Key #4", "Key #5",
+        "Key #6", "Key #7", "Key #8", "Key #9", "Key #10"
+    },
+    CurrentOption = {"Key #1"},
+    Flag = "KeySelector",
+    Callback = function(Options)
+        -- Rayfield passes an array of selected items (even if only one)
+        local Option = Options[1]
+        if Option then
+            local index = tonumber(Option:match("%d+"))
+            if index and validKeys[index] then
+                selectedKeyIndex = index
+            end
+        end
+    end
+})
+
+--// Copy Selected Key Button
+local Button = Tab:CreateButton({
+    Name = "Copy Selected Key",
+    Callback = function()
+        local keyToCopy = validKeys[selectedKeyIndex]
+        if keyToCopy then
+            setclipboard(keyToCopy)
+            Rayfield:Notify({
+                Title = "SXYNA",
+                Content = "Copied " .. keyToCopy .. " to clipboard.",
+                Duration = 6.5,
+                Image = "code",
+            })
+        else
+            Rayfield:Notify({
+                Title = "SXYNA",
+                Content = "No key selected.",
+                Duration = 6.5,
+                Image = "code",
+            })
+        end
+    end,
+})
