@@ -261,4 +261,3 @@ local Button = HelpTab:CreateButton({
          })
     end,
  })
-
