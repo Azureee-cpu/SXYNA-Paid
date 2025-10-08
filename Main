@@ -4,7 +4,13 @@
  local Players = game:GetService("Players")
  local LocalPlayer = Players.LocalPlayer
  local UserInputService = game:GetService("UserInputService")
+ local Camera = workspace.CurrentCamera
+ local RunService = game:GetService("RunService")
+ local TeleportService = game:GetService("TeleportService")
+ local HttpService = game:GetService("HttpService")
  
+local uiInitialized = false
+
 
 
 
@@ -225,11 +231,260 @@ local RSpeedButton = PlayerTab:CreateButton({
     end,
  })
 
+
+
+-- ✈️ HD-Admin Style Flight System
+local flying = false
+local flySpeed = 50
+local flyConn
+
+local function toggleFly(state)
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = character.HumanoidRootPart
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+
+    flying = state
+
+    if flying then
+        humanoid.PlatformStand = true
+
+        local bv = Instance.new("BodyVelocity")
+        bv.MaxForce = Vector3.new(1e6, 1e6, 1e6)
+        bv.Velocity = Vector3.zero
+        bv.P = 1e4
+        bv.Parent = hrp
+
+        local bg = Instance.new("BodyGyro")
+        bg.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
+        bg.CFrame = hrp.CFrame
+        bg.P = 1e4
+        bg.Parent = hrp
+
+        flyConn = RunService.RenderStepped:Connect(function()
+            if not flying or not hrp or not hrp.Parent then return end
+
+            -- Align character with camera
+            local camCFrame = Camera.CFrame
+            bg.CFrame = CFrame.new(hrp.Position, hrp.Position + camCFrame.LookVector)
+
+            -- Move in full 3D space
+            local moveDir = Vector3.zero
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                moveDir += camCFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                moveDir -= camCFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                moveDir -= camCFrame.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                moveDir += camCFrame.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                moveDir += Vector3.new(0, 1, 0)
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                moveDir -= Vector3.new(0, 1, 0)
+            end
+
+            if moveDir.Magnitude > 0 then
+                bv.Velocity = moveDir.Unit * (flySpeed or 50)
+            else
+                bv.Velocity = Vector3.zero
+            end
+        end)
+    else
+        humanoid.PlatformStand = false
+        if flyConn then flyConn:Disconnect() flyConn = nil end
+        for _, v in ipairs(hrp:GetChildren()) do
+            if v:IsA("BodyVelocity") or v:IsA("BodyGyro") then
+                v:Destroy()
+            end
+        end
+    end
+end
+
+-- ✅ Rayfield Toggle for Fly
+local Toggle = PlayerTab:CreateToggle({
+    Name = "Flight",
+    CurrentValue = false,
+    Flag = "FlightToggle",
+    Callback = function(Value)
+        toggleFly(Value)
+        Rayfield:Notify({
+            Title = "SXYNA - Notifications",
+            Content = Value and "Flight Enabled" or "Flight Disabled",
+            Duration = 5,
+            Image = "code",
+        })
+    end,
+})
+
+-- ✅ Rayfield Input for Flight Speed
+local Input = PlayerTab:CreateInput({
+    Name = "Flight Speed",
+    CurrentValue = tostring(flySpeed),
+    PlaceholderText = "Enter speed (e.g. 50)",
+    RemoveTextAfterFocusLost = true,
+    Flag = "FlightSpeedInput",
+    Callback = function(val)
+        flySpeed = tonumber(val) or 50
+        Rayfield:Notify({
+            Title = "SXYNA - Notifications",
+            Content = "Flight speed set to " .. tostring(flySpeed),
+            Duration = 4,
+            Image = "code",
+        })
+    end,
+})
+
+-- Auto stop flying when character resets
+LocalPlayer.CharacterAdded:Connect(function()
+    flying = false
+    if flyConn then flyConn:Disconnect() flyConn = nil end
+end)
+
+local noclip, noclipConn = false, nil
+local function toggleNoclip(state)
+    noclip = state
+    if noclip then
+        noclipConn = RunService.Stepped:Connect(function()
+            if LocalPlayer.Character then
+                for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then part.CanCollide = false end
+                end
+            end
+        end)
+    else
+        if noclipConn then noclipConn:Disconnect() noclipConn = nil end
+    end
+end
+PlayerTab:CreateToggle({Name="NoClip", CurrentValue=false, Callback=toggleNoclip})
+
+local InfiniteJumpEnabled = false
+UserInputService.JumpRequest:Connect(function()
+    if InfiniteJumpEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+    end
+end)
+
+PlayerTab:CreateToggle({Name="Infinite Jump", CurrentValue=false, Callback=function(state) InfiniteJumpEnabled = state end})
+
+
+local ClickTPEnabled=false
+PlayerTab:CreateToggle({Name="Click TP", CurrentValue=false, Callback=function(state) ClickTPEnabled=state end})
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if ClickTPEnabled and input.UserInputType == Enum.UserInputType.MouseButton1 then
+        local mouse = LocalPlayer:GetMouse()
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and mouse and mouse.Hit then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.p + Vector3.new(0,3,0))
+        end
+    end
+end)
+
+ local WorldTab = Window:CreateTab("World", "earth-lock")
+
+ WorldTab:CreateSlider({Name="Gravity", Range={0,1000}, Increment=1, CurrentValue=workspace.Gravity, Callback=function(val) workspace.Gravity=val end})
+
+ local Button = WorldTab:CreateButton({
+    Name = "Reset Gravity",
+    Callback = function()
+     workspace.Gravity=196.2
+     Rayfield:Notify({
+        Title = "SXYNA - Notifications",
+        Content = "Gravity Reset.",
+        Duration = 6.5,
+        Image = "code",
+     })
+    end,
+ })
+
+ local Button = WorldTab:CreateButton({
+    Name = "Low Gravity",
+    Callback = function()
+     workspace.Gravity=80
+     Rayfield:Notify({
+        Title = "SXYNA - Notifications",
+        Content = "Low Gravity Active.",
+        Duration = 6.5,
+        Image = "code",
+     })
+    end,
+ })
+
+ local Button = WorldTab:CreateButton({
+    Name = "Zero Gravity",
+    Callback = function()
+     workspace.Gravity=0
+     Rayfield:Notify({
+        Title = "SXYNA - Notifications",
+        Content = "Zero Gravity Active.",
+        Duration = 6.5,
+        Image = "code",
+     })
+    end,
+ })
+
+ local Button = WorldTab:CreateButton({
+    Name = "Stick To Ground",
+    Callback = function()
+     workspace.Gravity=10000
+     Rayfield:Notify({
+        Title = "SXYNA - Notifications",
+        Content = "Stick To Ground Active.",
+        Duration = 6.5,
+        Image = "code",
+     })
+    end,
+ })
  
 
- local KeybindsTab = Window:CreateTab("Keybinds", "square-chevron-up")
+ local UtilityTab = Window:CreateTab("Utility", "wrench")
 
- 
+ UtilityTab:CreateButton({Name="Rejoin Server", Callback=function() TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer) end})
+ UtilityTab:CreateButton({Name="Server Hop", Callback=function()
+    local servers = {}
+    local httpFunc = nil
+    if syn and syn.request then httpFunc = syn.request end
+    if http_request and not httpFunc then httpFunc = http_request end
+    if request and not httpFunc then httpFunc = request end
+
+    if not httpFunc then
+        Rayfield:Notify({Title="SXYNA", Content="Server hop unavailable: no http function", Duration=4, Image="code"})
+        return
+    end
+
+    local ok, res = pcall(function()
+        return httpFunc({Url = "https://games.roblox.com/v1/games/"..tostring(game.PlaceId).."/servers/Public?sortOrder=Asc&limit=100"})
+    end)
+    if not ok or not res or not res.Body then
+        Rayfield:Notify({Title="SXYNA", Content="Server hop failed (http)", Duration=4, Image="code"})
+        return
+    end
+
+    local success, decoded = pcall(function() return HttpService:JSONDecode(res.Body) end)
+    if not success or not decoded or not decoded.data then
+        Rayfield:Notify({Title="SXYNA", Content="Server hop failed (parse)", Duration=4, Image="code"})
+        return
+    end
+
+    for _,v in pairs(decoded.data) do
+        if type(v) == "table" and v.playing and v.maxPlayers and v.id and v.id ~= game.JobId then
+            if v.playing < v.maxPlayers then table.insert(servers, v.id) end
+        end
+    end
+
+    if #servers > 0 then
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, servers[math.random(1,#servers)], LocalPlayer)
+    else
+        Rayfield:Notify({Title="SXYNA", Content="No suitable servers found", Duration=4, Image="code"})
+    end
+end})
+
+
  local SettingsTab = Window:CreateTab("Settings", "settings")
  
  local themeChanger =
